@@ -18,5 +18,8 @@
     "type": "git",
     "url": "git://github.com/eltjoschol/HomeBridge_TestPlugin.git"
   },
-  "dependencies": { }
+  "dependencies": {
+    "request": "^2.65.0",
+  "polling-to-event": ">=2.0.2"
+  }
 }
