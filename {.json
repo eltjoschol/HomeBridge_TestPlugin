@@ -1,0 +1,22 @@
+{
+  "name": "homebridge-http-acs",
+  "version": "0.0.2",
+  "description": "ACS' http(s) plugin for Homebridge: https://github.com/nfarina/homebridge",
+  "license": "ISC",
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "author": {
+    "name": "Eltjo Schol"
+  },
+  "contributors":[], 
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/eltjoschol/HomeBridge_TestPlugin.git"
+  },
+  "dependencies": { }
+}
