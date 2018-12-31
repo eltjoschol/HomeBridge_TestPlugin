@@ -32,8 +32,7 @@ ACS.prototype = {
 	},
 
 
-
-	
+	// Switch On Function
 	_setOn:function(on, callback) {
 
 	  this.log("Setting Switch to " + on);
