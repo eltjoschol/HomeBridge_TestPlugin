@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-http-acs",
+  "name": "homebridge-httpacs",
   "version": "0.0.3",
   "description": "ACS Tools for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
