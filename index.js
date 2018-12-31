@@ -55,7 +55,7 @@ ACS.prototype = {
 
 	     this.informationService = informationService;
 
-		 return [this._service];
+		 return [this._service,this.informationService];
 	},
 
 
