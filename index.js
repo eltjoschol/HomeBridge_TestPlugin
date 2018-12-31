@@ -47,12 +47,15 @@ ACS.prototype = {
 
 
 	getServices:function () {
-		var informationService = new Service.AccessoryInformation();
+		let informationService = new Service.AccessoryInformation();
 		informationService
 	        .setCharacteristic(Characteristic.Manufacturer, "ACS Audiovisual Solutions BV")
 	        .setCharacteristic(Characteristic.Model, "Eltjo's Playground")
 	        .setCharacteristic(Characteristic.SerialNumber, "20181231 :)");
-		  return [this._service];
+
+	     this.informationService = informationService;
+
+		 return [this._service];
 	},
 
 
