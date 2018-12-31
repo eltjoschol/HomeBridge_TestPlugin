@@ -5,18 +5,16 @@
   "keywords": [
     "homebridge-plugin"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/nfarina/homebridge-dummy.git"
-  },
-  "bugs": {
-    "url": "http://github.com/nfarina/homebridge-dummy/issues"
-  },
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.2.0"
   },
+  "author": {
+    "name": "Adrian Rudman"
+  },
+
   "dependencies": {
-    "node-persist": "^2.1.0"
+    "request": "^2.65.0",
+  "polling-to-event": ">=2.0.2"
   }
 }

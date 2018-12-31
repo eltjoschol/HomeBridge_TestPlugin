@@ -1,20 +1,18 @@
-"use strict";
-
 var Service, Characteristic;
+var request = require("request");
+var pollingtoevent = require("polling-to-event");
 
-module.exports = function(homebridge) {
 
-  Service = homebridge.hap.Service;
-  Characteristic = homebridge.hap.Characteristic;
+module.exports = function (homebridge) {
+    Service = homebridge.hap.Service;
+    Characteristic = homebridge.hap.Characteristic;
+    homebridge.registerAccessory("homebridge-httpacs", "AcsDummySwitch", HttpAccessory);
+};
 
-  homebridge.registerAccessory("homebridge-httpacs", "AcsDummySwitch", ACS);
-}
 
-function ACS(log, config) {
-  this.log = log;
- // this.name = config.name;
+function HttpAccessory(log, config) {
+    this.log = log;
 
-  // ADDED
     // url info
     this.on_url = config["on_url"];
     this.on_body = config["on_body"];
@@ -23,15 +21,16 @@ function ACS(log, config) {
     this.status_url = config["status_url"];
     this.status_on = config["status_on"];
     this.status_off = config["status_off"];
-
-    this.http_method = config["http_method"] || "GET";
-
+    this.brightness_url = config["brightness_url"];
+    this.brightnesslvl_url = config["brightnesslvl_url"];
+    this.http_method = config["http_method"] || "GET";x
+    this.http_brightness_method = config["http_brightness_method"] || this.http_method;
     this.username = config["username"] || "";
     this.password = config["password"] || "";
     this.sendimmediately = config["sendimmediately"] || "";
     this.service = config["service"] || "Switch";
     this.name = config["name"];
-
+    this.brightnessHandling = config["brightnessHandling"] || "no";
     this.switchHandling = config["switchHandling"] || "no";
 
 
@@ -41,9 +40,8 @@ function ACS(log, config) {
     this.enableSet = true;
     var that = this;
 
-  // END ADDED
-
-  	if (this.status_url && this.switchHandling === "realtime") {
+    // Status Polling, if you want to add additional services that don't use switch handling you can add something like this || (this.service=="Smoke" || this.service=="Motion"))
+    if (this.status_url && this.switchHandling === "realtime") {
         var powerurl = this.status_url;
         var statusemitter = pollingtoevent(function (done) {
             that.httpRequest(powerurl, "", "GET", that.username, that.password, that.sendimmediately, function (error, response, body) {
@@ -116,17 +114,37 @@ function ACS(log, config) {
         });
 
     }
-    
+    // Brightness Polling
+    if (this.brightnesslvl_url && this.brightnessHandling === "realtime") {
+        var brightnessurl = this.brightnesslvl_url;
+        var levelemitter = pollingtoevent(function (done) {
+            that.httpRequest(brightnessurl, "", "GET", that.username, that.password, that.sendimmediately, function (error, response, responseBody) {
+                if (error) {
+                    that.log("HTTP get power function failed: %s", error.message);
+                    return;
+                } else {
+                    done(null, responseBody);
+                }
+            }) // set longer polling as slider takes longer to set value
+        }, { longpolling: true, interval: 300, longpollEventName: "levelpoll" });
 
-// OLD
-//  this._service = new Service.Switch(this.name);
-//  this._service.getCharacteristic(Characteristic.On)
-//    .on('set', this._setOn.bind(this));
+        levelemitter.on("levelpoll", function (responseBody) {
+            that.currentlevel = parseInt(responseBody);
+
+            that.enableSet = false;
+            if (that.lightbulbService) {
+                that.log(that.service, "received brightness", that.brightnesslvl_url, "level is currently", that.currentlevel);
+                that.lightbulbService.getCharacteristic(Characteristic.Brightness)
+                .setValue(that.currentlevel);
+            }
+            that.enableSet = true;
+        });
+    }
 }
 
-ACS.prototype = {
+HttpAccessory.prototype = {
 
-	httpRequest: function (url, body, method, username, password, sendimmediately, callback) {
+    httpRequest: function (url, body, method, username, password, sendimmediately, callback) {
         request({
                 url: url,
                 body: body,
@@ -143,36 +161,7 @@ ACS.prototype = {
             })
     },
 
-
-	// getServices:function () {
-	// 	// WERKT NOG NIET -->
-	// 	// let informationService = new Service.AccessoryInformation();
-	// 	// informationService
-	// 	 //        .setCharacteristic(Characteristic.Manufacturer, "ACS Audiovisual Solutions BV")
-	// 	 //        .setCharacteristic(Characteristic.Model, "Eltjo's Playground")
-	// 	 //        .setCharacteristic(Characteristic.SerialNumber, "20181231 :)");
-
-	// 	 //     this.informationService = informationService;
-	// 	 // <-- WERKT NOG NIET 
-	// 	 return [this._service];
-	// },
-
-
-	// // Switch On Function
-	// _setOn:function(on, callback) {
-
-	//   this.log("Setting Switch to " + on);
-
-	//   if (on) {
-	//     setTimeout(function() {
-	//       this._service.setCharacteristic(Characteristic.On, false);
-	//     }.bind(this), 1000);
-	//   }
-
-	//   callback();
-	// },
-
-	setPowerState: function (powerState, callback) {
+    setPowerState: function (powerState, callback) {
         this.log("Power On", powerState);
         this.log("Enable Set", this.enableSet);
         this.log("Current Level", this.currentlevel);
@@ -255,6 +244,54 @@ ACS.prototype = {
         }.bind(this));
     },
 
+    getBrightness: function (callback) {
+        if (!this.brightnesslvl_url) {
+            this.log.warn("Ignoring request; No brightness level url defined.");
+            callback(new Error("No brightness level url defined."));
+            return;
+        }
+        var url = this.brightnesslvl_url;
+        this.log("Getting Brightness level");
+
+        this.httpRequest(url, "", "GET", this.username, this.password, this.sendimmediately, function (error, response, responseBody) {
+            if (error) {
+                this.log("HTTP get brightness function failed: %s", error.message);
+                callback(error);
+            } else {
+                var binaryState = parseInt(responseBody.replace(/\D/g, ""));
+                var level = binaryState;
+                this.log("brightness state is currently %s", binaryState);
+                callback(null, level);
+            }
+        }.bind(this));
+    },
+
+    setBrightness: function (level, callback) {
+        if (this.enableSet === true) {
+            if (!this.brightness_url) {
+                this.log.warn("Ignoring request; No brightness url defined.");
+                callback(new Error("No brightness url defined."));
+                return;
+            }
+
+            var url = this.brightness_url.replace("%b", level);
+
+            this.log("Setting brightness to %s", level);
+
+            this.httpRequest(url, "", this.http_brightness_method, this.username, this.password, this.sendimmediately, function (error, response, body) {
+                if (error) {
+                    this.log("HTTP brightness function failed: %s", error);
+                    callback(error);
+                } else {
+                    this.log("HTTP brightness function succeeded!");
+                    callback();
+                }
+            }.bind(this));
+        } else {
+            callback();
+        }
+    },
+
     identify: function (callback) {
         this.log("Identify requested!");
         callback(); // success
@@ -323,10 +360,23 @@ ACS.prototype = {
                         .on("set", this.setPowerState.bind(this));
                         break;
                 }
-           
+                // Brightness Polling
+                if (this.brightnessHandling === "realtime") {
+                    this.lightbulbService
+                    .addCharacteristic(new Characteristic.Brightness())
+                    .on("get", function (callback) {
+                        callback(null, that.currentlevel)
+                    })
+                    .on("set", this.setBrightness.bind(this));
+                } else if (this.brightnessHandling === "yes") {
+                    this.lightbulbService
+                    .addCharacteristic(new Characteristic.Brightness())
+                    .on("get", this.getBrightness.bind(this))
+                    .on("set", this.setBrightness.bind(this));
+                }
+
                 return [informationService, this.lightbulbService];
                 break;
         }
     }
-
-} 
+};
