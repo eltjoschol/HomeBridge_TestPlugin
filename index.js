@@ -7,31 +7,44 @@ module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
 
-  homebridge.registerAccessory("homebridge-httpacs", "AcsDummySwitch", DummySwitch);
+  homebridge.registerAccessory("homebridge-httpacs", "AcsDummySwitch", ACS);
 }
 
-function DummySwitch(log, config) {
+function ACS(log, config) {
   this.log = log;
   this.name = config.name;
+
+  // ADDED
+  this.on_url = config["on_url"];
+  this.off_url = config["off_url"];
+  this.status_url = config["status_url"];
+
+  // END ADDED
 
   this._service = new Service.Switch(this.name);
   this._service.getCharacteristic(Characteristic.On)
     .on('set', this._setOn.bind(this));
 }
 
-DummySwitch.prototype.getServices = function() {
-  return [this._service];
-}
+ACS.prototype = {
+	getServices:function () {
+	  return [this._service];
+	},
 
-DummySwitch.prototype._setOn = function(on, callback) {
+
+
 	
-  this.log("Setting " + this.name + " to " + on);
+	_setOn:function(on, callback) {
 
-  if (on) {
-    setTimeout(function() {
-      this._service.setCharacteristic(Characteristic.On, false);
-    }.bind(this), 1000);
-  }
+	  this.log("Setting Switch to " + on);
 
-  callback();
+	  if (on) {
+	    setTimeout(function() {
+	      this._service.setCharacteristic(Characteristic.On, false);
+	    }.bind(this), 1000);
+	  }
+
+	  callback();
+	}
+
 } 
