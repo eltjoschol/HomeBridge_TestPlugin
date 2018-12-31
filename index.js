@@ -27,7 +27,30 @@ function ACS(log, config) {
 }
 
 ACS.prototype = {
+
+	httpRequest: function (url, body, method, username, password, sendimmediately, callback) {
+        request({
+                url: url,
+                body: body,
+                method: method,
+                rejectUnauthorized: false,
+                auth: {
+                    user: username,
+                    pass: password,
+                    sendImmediately: sendimmediately
+                }
+            },
+            function (error, response, body) {
+                callback(error, response, body)
+            })
+    },
+
+
 	getServices:function () {
+	informationService
+        .setCharacteristic(Characteristic.Manufacturer, "ACS Audiovisual Solutions BV")
+        .setCharacteristic(Characteristic.Model, "Eltjo's Playground")
+        .setCharacteristic(Characteristic.SerialNumber, "20181231 :)");
 	  return [this._service];
 	},
 
