@@ -1,4 +1,4 @@
-use strict";
+"use strict";
 
 var Service, Characteristic;
 
@@ -7,7 +7,7 @@ module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
 
-  homebridge.registerAccessory("homebridge-dummy", "ACSSwitch", ACSSwitch);
+  homebridge.registerAccessory("HomeBridge_TestPlugin", "ACSSwitch", ACSSwitch);
 }
 
 function ACSSwitch(log, config) {
