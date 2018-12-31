@@ -24,8 +24,8 @@ DummySwitch.prototype.getServices = function() {
 }
 
 DummySwitch.prototype._setOn = function(on, callback) {
-
-  this.log("Setting switch to " + on);
+	
+  this.log("Setting " + this.name + " to " + on);
 
   if (on) {
     setTimeout(function() {
