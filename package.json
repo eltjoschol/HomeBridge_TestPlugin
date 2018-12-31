@@ -2,21 +2,19 @@
   "name": "homebridge-httpacs",
   "version": "0.0.3",
   "description": "ACS Tools for Homebridge: https://github.com/nfarina/homebridge",
-  "license": "ISC",
   "keywords": [
     "homebridge-plugin"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nfarina/homebridge-dummy.git"
+  },
+  "bugs": {
+    "url": "http://github.com/nfarina/homebridge-dummy/issues"
+  },
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.2.0"
-  },
-  "author": {
-    "name": "Eltjo Schol"
-  },
-  "contributors":[], 
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/eltjoschol/HomeBridge_TestPlugin.git"
   },
   "dependencies": {
     "node-persist": "^2.1.0"
