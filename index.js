@@ -3,14 +3,13 @@
 var Service, Characteristic, HomebridgeAPI;
 
 module.exports = function(homebridge) {
-
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   HomebridgeAPI = homebridge;
-  homebridge.registerAccessory("homebridge-http-acs", "ACSDummySwitch", ACSDummySwitch);
+  homebridge.registerAccessory("homebridge-http-acs", "DummySwitch", DummySwitch);
 }
 
-function ACSDummySwitch(log, config) {
+function DummySwitch(log, config) {
   this.log = log;
   this.name = config.name;
   this.stateful = config.stateful;
@@ -36,11 +35,11 @@ function ACSDummySwitch(log, config) {
   }
 }
 
-ACSDummySwitch.prototype.getServices = function() {
+DummySwitch.prototype.getServices = function() {
   return [this._service];
 }
 
-ACSDummySwitch.prototype._setOn = function(on, callback) {
+DummySwitch.prototype._setOn = function(on, callback) {
 
   this.log("Setting switch to " + on);
 
